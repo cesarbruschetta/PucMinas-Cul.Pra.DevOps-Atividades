@@ -28,10 +28,15 @@ resource "aws_instance" "this" {
       Name = "${local.prefix}-site"
     }
   )
+
+  depends_on = [
+    aws_ebs_volume.this
+  ]
+
 }
 
 resource "aws_ebs_volume" "this" {
-  availability_zone = var.aws_region
+  availability_zone = "${var.aws_region}a"
   size              = 10
 
   tags = merge(
@@ -42,8 +47,8 @@ resource "aws_ebs_volume" "this" {
   )
 }
 
-resource "aws_volume_attachment" "this" {
+resource "aws_volume_attachment" "ec2_1" {
   device_name = "/dev/sdh"
   volume_id   = aws_ebs_volume.this.id
-  instance_id = aws_instance.this.id
+  instance_id = aws_instance.this.0.id
 }
