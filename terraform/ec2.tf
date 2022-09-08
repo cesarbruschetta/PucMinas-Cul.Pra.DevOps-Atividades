@@ -1,0 +1,49 @@
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-*-20.04-amd64-server-*"]
+  }
+}
+
+resource "aws_key_pair" "this" {
+  key_name   = "${local.prefix}-key"
+  public_key = var.aws_public_key
+}
+
+resource "aws_instance" "this" {
+  ami                         = data.aws_ami.ubuntu.id
+  instance_type               = var.aws_instance_type
+  count                       = 2
+  key_name                    = aws_key_pair.this.key_name
+  associate_public_ip_address = true
+  user_data                   = file("./scripts/nginx.sh")
+
+  vpc_security_group_ids = [aws_security_group.sg-web.id]
+  subnet_id              = aws_subnet.this.id
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${local.prefix}-site"
+    }
+  )
+}
+
+resource "aws_ebs_volume" "this" {
+  availability_zone = var.aws_region
+  size              = 10
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${local.prefix}-volume-site"
+    }
+  )
+}
+
+resource "aws_volume_attachment" "this" {
+  device_name = "/dev/sdh"
+  volume_id   = aws_ebs_volume.this.id
+  instance_id = aws_instance.this.id
+}
