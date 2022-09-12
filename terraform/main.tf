@@ -23,7 +23,7 @@ terraform {
   backend "s3" {
     profile = "terraform"
     bucket  = "dev-puc-artefact-643626749185-us-east-1"
-    key     = "state/devops/atividade01.tfstate"
+    key     = "state/devops/trabalhoPratico.tfstate"
     region  = "us-east-1"
     encrypt = true
   }

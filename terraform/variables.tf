@@ -17,9 +17,3 @@ variable "aws_instance_type" {
   description = "Type of instance to launch"
   type        = string
 }
-
-variable "aws_public_key" {
-  description = "value"
-  type        = string
-  sensitive = true
-}
