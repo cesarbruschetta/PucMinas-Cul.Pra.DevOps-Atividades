@@ -49,17 +49,17 @@ resource "aws_instance" "this" {
     inline = [
       "sudo apt-get update",
       "sudo apt-get install -y curl wget nfs-common",
-      "sudo mkdir -p /mnt/website",
+      "sudo mkdir -p /mnt/website && sudo chown ubuntu:ubuntu -R /mnt/website",
       "sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${aws_efs_mount_target.efs-mt-site.dns_name}:/ /mnt/website",
       "sudo curl -fsSL https://get.docker.com | bash",
-      "sudo docker run --name ${local.prefix}-website-nginx -v /mnt/website:/usr/share/nginx/html:ro -d nginx",
+      "sudo docker run --name ${local.prefix}-website-nginx -v /mnt/website:/usr/share/nginx/html:ro -p 80:80 -d nginx",
     ]
   }
   
   # Copy files to EFS
   provisioner "file" {
     source      = "../website"
-    destination = "/mnt/"
+    destination = "/mnt"
   }
 
 }
